@@ -74,7 +74,7 @@ int main() {
         pthread_detach(t_info->worker1_tid);
     }
 
-    // wait for completion - todo: make this a proper signal handler
+    // wait for completion
     logger("waiting for layer1 to complete", lfp, true);
     sync_lock(first_sync);
 
