@@ -1,26 +1,21 @@
-#include <semaphore.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <logging.h>
+#include <sync.h>
 #include <worker1.h>
+
 
 // worker_multiply thread to perform multiplication
 int worker_multiply(worker_multiply_args *args) {
 
     // check for null pointers
-    if (args == NULL || args->in == NULL || args->factor == NULL || args->out == NULL || args->sem == NULL) {
+    if (args == NULL || args->in == NULL || args->factor == NULL || args->out == NULL) {
         logger("worker_multiply(): null input", NULL, true);
         return 1;
     }
     sleep(2);
     // perform the calculation
     *args->out = *args->in * *args->factor;
-    // signal the sem
-    int ret = sem_post(args->sem);
-    if (ret != 0) {
-        logger("sem_post(): error", NULL, true);
-        return ret;
-    }
     
     return 0;
 }
@@ -29,18 +24,13 @@ int worker_multiply(worker_multiply_args *args) {
 int worker_divide(worker_divide_args *args) {
 
     // check for null pointers
-    if (args == NULL || args->in == NULL || args->div == NULL || args->out == NULL || args->sem == NULL) {
+    if (args == NULL || args->in == NULL || args->div == NULL || args->out == NULL) {
         logger("worker_divide(): null input", NULL, true);
         return 1;
     }
+    sleep(1);
     // perform the calculation
     *args->out = *args->in / *args->div;
-    // signal the sem
-    int ret = sem_post(args->sem);
-    if (ret != 0) {
-        logger("sem_post(): error", NULL, true);
-        return ret;
-    }
 
     return 0;
 }
@@ -71,4 +61,6 @@ void *worker1(void *arg) {
         default:
             logger("worker1(): unhandled worker type", NULL, true);
     }
+    // update the sync tracker
+    sync_dec(w1_args->sync, 1);
 }

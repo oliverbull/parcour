@@ -9,10 +9,10 @@ SDIR=./src
 LIBS=-lpthread
 DEBUG=-g3
 
-_DEPS = logging.h worker1.h
+_DEPS = logging.h worker1.h sync.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o logging.o worker1.o
+_OBJ = main.o logging.o worker1.o sync.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)

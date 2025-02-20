@@ -1,15 +1,12 @@
-#include <semaphore.h>
 #include <pthread.h>
 
 typedef struct {
-    sem_t *sem;
     double *in;
     double *factor;
     double *out;
 } worker_multiply_args;
 
 typedef struct {
-    sem_t *sem;
     double *in;
     double *div;
     double *out;
@@ -27,6 +24,7 @@ typedef union {
 
 typedef struct {
     int id;
+    sync_t *sync;
     enum worker_type type; // overload type as worker selection and arg struct
     worker1_type_args args;
 } worker1_args;

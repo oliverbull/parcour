@@ -1,9 +1,8 @@
 #include <pthread.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <sync.h>
 #include <worker1.h>
 #include <logging.h>
 
@@ -37,10 +36,11 @@ int main() {
     // set the output
     double out[FIRST_NUM] = {};
 
-    // setup the worker1 semaphore
-    sem_t *first_sem = calloc(sizeof(sem_t), 1);
-    if (sem_init(first_sem, 0, 0) == -1)
-        handle_error("sem_init");
+    // setup the sync mutex
+    sync_t *first_sync = calloc(sizeof(sync_t), 1);
+    if (sync_init(first_sync) != 0) {
+        handle_error("sync_init");
+    }
 
     // prepare the thread info
     worker1_thread_info_t *worker1_thread_info = calloc(sizeof(worker1_thread_info_t), FIRST_NUM);
@@ -51,18 +51,20 @@ int main() {
         // prep the args - alternate between job type
         worker1_thread_info_t *t_info = &worker1_thread_info[tidx];
         t_info->args.id = tidx;
+        t_info->args.sync = first_sync;
         if (tidx % 2 == 0) {
             t_info->args.type = MULT;
             t_info->args.args.multiply.in = &input;
             t_info->args.args.multiply.factor = &fact[tidx/2];
             t_info->args.args.multiply.out = &out[tidx];
-            t_info->args.args.multiply.sem = first_sem;
         } else {
             t_info->args.type = DIV;
             t_info->args.args.divide.in = &input;
             t_info->args.args.divide.div = &div[tidx/2];
             t_info->args.args.divide.out = &out[tidx];
-            t_info->args.args.divide.sem = first_sem;
+        }
+        if (sync_add(first_sync, 1) != 0) {
+            handle_error("sync_add");
         }
         int ret = pthread_create(&t_info->worker1_tid, NULL, &worker1, &t_info->args);
         if (ret != 0) {
@@ -74,18 +76,12 @@ int main() {
 
     // wait for completion - todo: make this a proper signal handler
     logger("waiting for layer1 to complete", lfp, true);
-    int sem_count = 0;
-    while (sem_count < FIRST_NUM) {
-        sleep(1);
-        sem_getvalue(first_sem, &sem_count);
-        sprintf(log_str, "sem count: %d", sem_count);
-        logger(log_str, lfp, true);
-    }
+    sync_lock(first_sync);
 
     // threads done, so can now free the info, close and free semaphore
     free(worker1_thread_info);
-    sem_close(first_sem);
-    free(first_sem);
+    sync_close(first_sync);
+    free(first_sync);
 
     // print the results
     sprintf(log_str, "%s", "layer 1 result: ");
