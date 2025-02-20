@@ -88,7 +88,8 @@ int main() {
     free(first_sem);
 
     // print the results
-    char res_str[128] = "layer 1 result: ";
+    sprintf(log_str, "%s", "layer 1 result: ");
+    char res_str[128];
     for (int idx = 0; idx < FIRST_NUM; idx++) {
         sprintf(res_str, "%f, ", out[idx]);
         strcat(log_str, res_str);
