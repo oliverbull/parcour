@@ -78,7 +78,7 @@ int main() {
     logger("waiting for layer1 to complete", lfp, true);
     sync_lock(first_sync);
 
-    // threads done, so can now free the info, close and free semaphore
+    // threads done, so can now free the info and sync
     free(worker1_thread_info);
     sync_close(first_sync);
     free(first_sync);
