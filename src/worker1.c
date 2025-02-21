@@ -13,6 +13,7 @@ int worker_multiply(worker_multiply_args *args) {
         logger("worker_multiply(): null input", NULL, true);
         return 1;
     }
+    // simulate some processing time
     sleep(2);
     // perform the calculation
     *args->out = *args->in * *args->factor;
@@ -28,6 +29,7 @@ int worker_divide(worker_divide_args *args) {
         logger("worker_divide(): null input", NULL, true);
         return 1;
     }
+    // simulate some processing time
     sleep(1);
     // perform the calculation
     *args->out = *args->in / *args->div;

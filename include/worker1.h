@@ -1,4 +1,3 @@
-#include <pthread.h>
 
 typedef struct {
     double *in;
